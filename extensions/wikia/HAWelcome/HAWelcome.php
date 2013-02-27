@@ -54,6 +54,11 @@ class HAWelcomeJob extends Job {
                 // Always...
                 return true; // ... to the single purpose of the moment.
         }
+
+        /**
+         *
+         */
+        public function run() {}
 }
 
 /*
