@@ -37,6 +37,11 @@ $wgExtensionCredits['other'][] = array(
 $wgHooks['RevisionInsertComplete'][] = 'HAWelcomeJob::onRevisionInsertComplete';
 
 /**
+ * Map the job to its handling class.
+ */
+$wgJobClasses[HAWelcomeJob::JOB_IDENTIFIER] = 'HAWelcomeJob';
+
+/**
  *
  * @see http://www.mediawiki.org/wiki/Manual:Job_queue/For_developers
  */
@@ -44,27 +49,67 @@ class HAWelcomeJob extends Job {
 
         /**
          *
+         */
+        const JOB_IDENTIFIER = 'HAWelcome';
+
+        /**
+         * @param $oRevision Object The Revision object.
+         * @param $sData String URL to external object.
+         * @param $sFlags String Flags for this revision.
+         *
          * @see http://www.mediawiki.org/wiki/Manual:$wgHooks
          * @see http://www.mediawiki.org/wiki/Manual:Hooks/RevisionInsertComplete
          */
-        public static function onRevisionInsertComplete( &$revision, $data, $flags ) {
+        public static function onRevisionInsertComplete( &$oRevision, $sData, $sFlags ) {
+
                 wfProfileIn( __METHOD__ );
-		wfDebug( __METHOD__ );
+
+                // Ignore revisions created in the command-line mode.
+                if ( !$wgCommandLineMode ) {
+
+                        // Get the associated Title object.
+                        $oTitle = $oRevision->getTitle();
+
+                        // Sometimes, for some reason or other, the Revision object
+                        // does not contain the associated Title object. It has to be
+                        // recreated based on the associated Page object.
+                        if ( !$oTitle ) {
+                                //TODO Make the log message more verbose.
+                                Wikia::log( __METHOD__ . ' Recreated the Title object.' );
+                                $oTitle = Title::newFromId( $oRevision->getPage(), Title::GAID_FOR_UPDATE );
+                        }
+
+                        $oTitle = Title::newFromText( self::JOB_IDENTIFIER );
+                        $aParams = array();
+
+                        // Schedule the job.
+                        $oJob = new self( $oTitle, $aParams );
+                        $oJob->insert();
+                }
+
                 wfProfileOut( __METHOD__ );
+
                 // Always...
                 return true; // ... to the single purpose of the moment.
         }
 
         /**
+         * @param $oTitle Object
+         * @param $aParams Array
+         * @param $iId Integer
+         */
+        public function __construct( $oTitle, $aParams, $iId = 0 ) {
+                wfProfileIn( __METHOD__ );
+                parent::__construct( self::JOB_IDENTIFIER, $oTitle, $aParams, $iId );
+                wfProfileOut( __METHOD__ );
+        }
+
+        /**
          *
          */
-        public function run() {}
+        public function run() {
+                wfProfileIn( __METHOD__ );
+                wfDebug( __METHOD__ . PHP_EOL );
+                wfProfileOut( __METHOD__ );
+        }
 }
-
-/*
-
-    &$revision: the Revision object
-    $data: URL to external object
-    $flags: flags for this revision
-
-*/
