@@ -37,11 +37,6 @@ $wgExtensionCredits['other'][] = array(
 $wgHooks['RevisionInsertComplete'][] = 'HAWelcomeJob::onRevisionInsertComplete';
 
 /**
- * Map the job to its handling class.
- */
-$wgJobClasses[HAWelcomeJob::JOB_IDENTIFIER] = 'HAWelcomeJob';
-
-/**
  *
  * @see http://www.mediawiki.org/wiki/Manual:Job_queue/For_developers
  */
@@ -113,3 +108,8 @@ class HAWelcomeJob extends Job {
                 wfProfileOut( __METHOD__ );
         }
 }
+
+/**
+ * Map the job to its handling class.
+ */
+$wgJobClasses[HAWelcomeJob::JOB_IDENTIFIER] = 'HAWelcomeJob';
