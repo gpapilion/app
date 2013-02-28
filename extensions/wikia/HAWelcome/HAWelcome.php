@@ -29,6 +29,13 @@ $wgExtensionCredits['other'][] = array(
 );
 
 /**
+ * Command name for the job aka type of the job.
+ *
+ * @see http://www.mediawiki.org/wiki/Manual:RunJobs.php
+ */
+define( 'HAWELCOME_JOB_IDENTIFIER', 'HAWelcome' );
+
+/**
  * Global list of hooks.
  *
  * @see http://www.mediawiki.org/wiki/Manual:$wgHooks
@@ -37,15 +44,15 @@ $wgExtensionCredits['other'][] = array(
 $wgHooks['RevisionInsertComplete'][] = 'HAWelcomeJob::onRevisionInsertComplete';
 
 /**
+ * Map the job to its handling class.
+ */
+$wgJobClasses[HAWELCOME_JOB_IDENTIFIER] = 'HAWelcomeJob';
+
+/**
  *
  * @see http://www.mediawiki.org/wiki/Manual:Job_queue/For_developers
  */
 class HAWelcomeJob extends Job {
-
-        /**
-         *
-         */
-        const JOB_IDENTIFIER = 'HAWelcome';
 
         /**
          * @param $oRevision Object The Revision object.
@@ -74,7 +81,6 @@ class HAWelcomeJob extends Job {
                                 $oTitle = Title::newFromId( $oRevision->getPage(), Title::GAID_FOR_UPDATE );
                         }
 
-                        $oTitle = Title::newFromText( self::JOB_IDENTIFIER );
                         $aParams = array();
 
                         // Schedule the job.
@@ -95,7 +101,7 @@ class HAWelcomeJob extends Job {
          */
         public function __construct( $oTitle, $aParams, $iId = 0 ) {
                 wfProfileIn( __METHOD__ );
-                parent::__construct( self::JOB_IDENTIFIER, $oTitle, $aParams, $iId );
+                parent::__construct( HAWELCOME_JOB_IDENTIFIER, $oTitle, $aParams, $iId );
                 wfProfileOut( __METHOD__ );
         }
 
@@ -108,8 +114,3 @@ class HAWelcomeJob extends Job {
                 wfProfileOut( __METHOD__ );
         }
 }
-
-/**
- * Map the job to its handling class.
- */
-$wgJobClasses[HAWelcomeJob::JOB_IDENTIFIER] = 'HAWelcomeJob';
