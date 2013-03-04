@@ -55,6 +55,21 @@ $wgJobClasses[HAWELCOME_JOB_IDENTIFIER] = 'HAWelcomeJob';
 class HAWelcomeJob extends Job {
 
         /**
+         * The default user to send welcome messages.
+         */
+        const DEFAULT_WELCOMER = 'Wikia';
+
+        /**
+         * The id of the recipient.
+         */
+        public $iRecipientId;
+
+        /**
+         * The name of the recipient.
+         */
+        public $sRecipientName;
+
+        /**
          * @param $oRevision Object The Revision object.
          * @param $sData String URL to external object.
          * @param $sFlags String Flags for this revision.
@@ -76,12 +91,22 @@ class HAWelcomeJob extends Job {
                         // does not contain the associated Title object. It has to be
                         // recreated based on the associated Page object.
                         if ( !$oTitle ) {
-                                //TODO Make the log message more verbose.
-                                Wikia::log( __METHOD__ . ' Recreated the Title object.' );
+                                Wikia::log( sprintf(
+                                        '%s recreated Title for page %d, revision %d, URL %s',
+                                        __METHOD__, $oRevision->getPage(),
+                                        $oRevision->getId(), $oTitle->getFullURL()
+                                ) );
                                 $oTitle = Title::newFromId( $oRevision->getPage(), Title::GAID_FOR_UPDATE );
                         }
 
-                        $aParams = array();
+                        // Parameters for the job:
+                        //
+                        // iUserId: the id of the user to be welcome (0 if anon)
+                        // sUserName: the name of the user to be welcome (IP if anon)
+                        $aParams = array(
+                                'iUserId' => $oRevision->getRawUser(),
+                                'sUserName' => $oRevision->getRawUserText()
+                        );
 
                         // Schedule the job.
                         $oJob = new self( $oTitle, $aParams );
@@ -101,6 +126,8 @@ class HAWelcomeJob extends Job {
          */
         public function __construct( $oTitle, $aParams, $iId = 0 ) {
                 wfProfileIn( __METHOD__ );
+                $this->iRecipientId = $aParams['iUserId'];
+                $this->sRecipientName = $aParams['sUserName'];
                 parent::__construct( HAWELCOME_JOB_IDENTIFIER, $oTitle, $aParams, $iId );
                 wfProfileOut( __METHOD__ );
         }
@@ -110,7 +137,25 @@ class HAWelcomeJob extends Job {
          */
         public function run() {
                 wfProfileIn( __METHOD__ );
-                wfDebug( __METHOD__ . PHP_EOL );
+                /**
+                 * Create a sender object.
+                 */
+                global $wgUser;
+                $wgUser = User::newFromName( self::DEFAULT_WELCOMER );
+
+                /**
+                 * Create a target page object.
+                 */
+                $oTargetPage = User::newFromName( $this->sRecipientName )->getUserPage()->getTalkPage();
+
+                /**
+                 * Put a welcome message onto the target page.
+                 */
+                $oTargetPage->doEdit( 'HAWelcome Sample Message', 'HAWelcome Log Message', 0 );
+
                 wfProfileOut( __METHOD__ );
+
+                // Always...
+                return true; // ... to the single purpose of the moment.
         }
 }
