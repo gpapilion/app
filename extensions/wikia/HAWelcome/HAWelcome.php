@@ -139,21 +139,25 @@ class HAWelcomeJob extends Job {
          */
         public function run() {
                 wfProfileIn( __METHOD__ );
-                /**
-                 * Create a sender object.
-                 */
+
+                // Create a sender object.
                 global $wgUser;
                 $wgUser = User::newFromName( self::DEFAULT_WELCOMER );
 
-                /**
-                 * Create a target page object.
-                 */
-                $oTargetPage = new Article( User::newFromName( $this->sRecipientName )->getUserPage()->getTalkPage() );
 
-                /**
-                 * Put a welcome message onto the target page.
-                 */
-                $oTargetPage->doEdit( 'HAWelcome Sample Message', 'HAWelcome Log Message', 0 );
+                // Create a target page object.
+                $oTargetPage = new Article ( User::newFromName( $this->sRecipientName )->getUserPage()->getTalkPage() );
+
+                // Prepend the message with the existing content of the talk page.
+                if ( $oTargetPage->exists() ) {
+                        $sMessage = $oTargetPage->getContent();
+                }
+
+                // Create a sample welcome message.
+                $sMessage .= '<br /><br />HAWelcome Sample Message';
+
+	        // Put a welcome message onto the target page.
+                $oTargetPage->doEdit( $sMessage, 'HAWelcome Log Message', 0 );
 
                 wfProfileOut( __METHOD__ );
 
