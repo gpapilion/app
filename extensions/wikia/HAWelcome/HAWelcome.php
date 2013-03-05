@@ -82,6 +82,8 @@ class HAWelcomeJob extends Job {
                 wfProfileIn( __METHOD__ );
 
                 // Ignore revisions created in the command-line mode.
+                // Otherwise HAWelcome::run() would invoke HAWelcome::onRevisionInsertComplete(), too.
+                global $wgCommandLineMode;
                 if ( !$wgCommandLineMode ) {
 
                         // Get the associated Title object.
@@ -146,7 +148,7 @@ class HAWelcomeJob extends Job {
                 /**
                  * Create a target page object.
                  */
-                $oTargetPage = User::newFromName( $this->sRecipientName )->getUserPage()->getTalkPage();
+                $oTargetPage = new Article( User::newFromName( $this->sRecipientName )->getUserPage()->getTalkPage() );
 
                 /**
                  * Put a welcome message onto the target page.
