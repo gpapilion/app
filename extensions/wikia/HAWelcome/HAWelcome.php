@@ -287,10 +287,11 @@ class HAWelcomeJob extends Job {
     public function setMessage() {
         wfProfileIn( __METHOD__ );
 
+        $sMessageKey = 'welcome-message-';
         // Determine the proper message key
         //
         // Is Message Wall enabled?
-        $sMessageKey  = $this->bMessageWallExt
+        $sMessageKey  .= $this->bMessageWallExt
             ? 'wall-'  : '';
         // Is recipient a registered user?
         $sMessageKey .= $this->iRecipientId
