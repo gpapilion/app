@@ -266,7 +266,7 @@ class HAWelcomeJob extends Job {
             }
 
             // If configured so, create a user profile page, if not exists.
-            if ( ! $this->aSwitches['page-user'] ) {
+            if ( $this->aSwitches['page-user'] ) {
                 $oRecipientProfile = new Article( $this->oRecipient->getUserPage() );
                 if ( ! $oRecipientProfile->exists() ) {
                     $oRecipientProfile->doEdit( wfMsgForContentNoTrans( 'welcome-user-page', $this->sRecipientName ), false, $this->iFlags );
@@ -293,7 +293,7 @@ class HAWelcomeJob extends Job {
             ? 'wall-'  : '';
         // Is recipient a registered user?
         $sMessageKey .= $this->iRecipientId
-            ? 'user-'  : 'anon';
+            ? 'user'  : 'anon';
         // Is sender a staff member?
         $sMessageKey .= in_array( 'staff', $this->oSender->getEffectiveGroups() )
             ? '-staff' : '';
