@@ -274,12 +274,6 @@ class HAWelcomeJob extends Job {
             }
 
         // End: registered users block
-        } else {
-            // This should not happen.
-            Wikia::log( sprintf(
-                '%s failed while trying to send a welcome message to %s (%d).',
-                __METHOD__, $this->sRecipientName, $this->iRecipientId
-            ) );
         }
 
         wfProfileOut( __METHOD__ );
