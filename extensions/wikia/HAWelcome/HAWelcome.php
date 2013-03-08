@@ -330,7 +330,7 @@ class HAWelcomeJob extends Job {
 
         // Próbuję utworzyć obiekt User na podstawie wildcarda ustawionego
         // jawnie przed admina lub na messagingu.
-        if ( in_array( $sSender, '@latest', '@sysop' ) ) {
+        if ( in_array( $sSender, array( '@latest', '@sysop' ) ) ) {
 
             // First, the cache.
             global $wgMemc;
