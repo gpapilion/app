@@ -104,18 +104,25 @@ class HAWelcomeJob extends Job {
 
         wfProfileIn( __METHOD__ );
 
+        wfDebug( __METHOD__ . "START.\n" );
+
         // Ignore revisions created in the command-line mode.
         // Otherwise HAWelcome::run() would invoke HAWelcome::onRevisionInsertComplete(), too.
         global $wgCommandLineMode;
         if ( !$wgCommandLineMode ) {
 
+            wfDebug( __METHOD__ . " not in command line mode so going forward...\n" );
+
             // Abort, if the anonymous contributor has been messaged recently.
             if ( ! $oRevision->getRawUser() ) {
+                wfDebug( __METHOD__ . " anon edited, checking cache\n" );
                 global $wgMemc;
                 if ( $wgMemc->get( wfMemcKey( 'HAWelcome-isPosted', $oRevision->getRawUserText() ) ) ) {
+                    wfDebug( __METHOD__ . " anon recently messaged, aborting.\n" );
                     wfProfileOut( __METHOD__ );
                     return true; // so the calling method would continue.
                 }
+                wfDebug( __METHOD__ . " anon not messaged, going forward.\n" );
             }
 
             // Note, that this code is executed during an HTTP request. This is just a simple and quick
@@ -125,6 +132,7 @@ class HAWelcomeJob extends Job {
 
             // Get the associated Title object.
             $oTitle = $oRevision->getTitle();
+            wfDebug( __METHOD__ . " getting title.\n" );
 
             // Sometimes, for some reason or other, the Revision object
             // does not contain the associated Title object. It has to be
@@ -135,6 +143,7 @@ class HAWelcomeJob extends Job {
                     __METHOD__, $oRevision->getPage(), $oRevision->getId(), $oTitle->getFullURL()
                 ) );
                 $oTitle = Title::newFromId( $oRevision->getPage(), Title::GAID_FOR_UPDATE );
+                wfDebug( __METHOD__ . " recreated title.\n" );
             }
 
             // Parameters for the job:
@@ -146,11 +155,19 @@ class HAWelcomeJob extends Job {
                 'sUserName' => $oRevision->getRawUserText()
             );
 
+            wfDebug( sprintf( "%s: aParams: %s\n", __METHOD__, serialize( $aParams ) ) );
+
             // Schedule the job.
             $oJob = new self( $oTitle, $aParams );
-            $oJob->insert();
+            if ( $oJob->insert() ) {
+                wfDebug( __METHOD__ . " scheduled a job!.\n" );
+            } else {
+                wfDebug( __METHOD__ . " didn't schedule a job!.\n" );
+            }
 
         }
+
+        wfDebug( __METHOD__ . "END.\n" );
 
         wfProfileOut( __METHOD__ );
 
@@ -171,10 +188,15 @@ class HAWelcomeJob extends Job {
      */
     public function __construct( $oTitle, $aParams, $iId = 0 ) {
         wfProfileIn( __METHOD__ );
+        wfDebug( __METHOD__ . "START.\n" );
+        wfDebug( sprintf( "%s: oTitle: %s\n", __METHOD__, $oTitle->getCanonicalURL() ) );
+        wfDebug( sprintf( "%s: aParams: %s\n", __METHOD__, serialize( $aParams ) ) );
+        wfDebug( sprintf( "%s: iId: %d\n", __METHOD__, $iId ) );
         // Convert params to object properties (easier access).
         $this->iRecipientId = $aParams['iUserId'];
         $this->sRecipientName = $aParams['sUserName'];
         parent::__construct( HAWELCOME_JOB_IDENTIFIER, $oTitle, $aParams, $iId );
+        wfDebug( __METHOD__ . "END.\n" );
         wfProfileOut( __METHOD__ );
     }
 
