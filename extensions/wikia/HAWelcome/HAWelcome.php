@@ -241,8 +241,6 @@ class HAWelcomeJob extends Job {
             $this->iFlags = EDIT_FORCE_BOT;
         }
 
-        var_dump( $this->aSwitches );
-
         // Start: anonymous users block
         if ( ! $this->iRecipientId && $this->aSwitches['message-anon'] ) {
 
@@ -259,10 +257,10 @@ class HAWelcomeJob extends Job {
         // End: anonymous users block
 
         // Start: registered users block
-        } else if ( $this->iRecipientId  && ! $this->oRecipient->getEditCountLocal() ) {
+        } else if ( $this->iRecipientId ) { // && ! $this->oRecipient->getEditCountLocal() ) {
 
             // If configured so, send a welcome message.
-            if ( $this->aSwitches['message-users'] ) {
+            if ( $this->aSwitches['message-user'] ) {
                 $this->setMessage();
                 $this->sendMessage();
             }
