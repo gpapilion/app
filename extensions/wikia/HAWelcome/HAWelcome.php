@@ -241,6 +241,8 @@ class HAWelcomeJob extends Job {
             $this->iFlags = EDIT_FORCE_BOT;
         }
 
+        var_dump( $this->aSwitches );
+
         // Start: anonymous users block
         if ( ! $this->iRecipientId && $this->aSwitches['message-anon'] ) {
 
@@ -443,9 +445,9 @@ class HAWelcomeJob extends Job {
             $wgUser = $this->oSender;
 
             // Prepend the message with the existing content of the talk page.
-            if ( $this->oRecipientTalkPage->exists() ) {
-                $sMessage = $this->oRecipientTalkPage->getContent() . $this->sMessage;
-            }
+            $sMessage = ( $this->oRecipientTalkPage->exists() )
+                ? $sMessage = $this->oRecipientTalkPage->getContent() . $this->sMessage
+                : $this->sMessage;
 
             $this->oRecipientTalkPage->doEdit( $sMessage, wfMsg( 'welcome-message-log' ), $this->iFlags );
 
