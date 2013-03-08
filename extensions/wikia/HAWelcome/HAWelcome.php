@@ -445,7 +445,7 @@ class HAWelcomeJob extends Job {
 
             // Prepend the message with the existing content of the talk page.
             $sMessage = ( $this->oRecipientTalkPage->exists() )
-                ? $sMessage = $this->oRecipientTalkPage->getContent() . $this->sMessage
+                ? $sMessage = $this->oRecipientTalkPage->getContent() . '<br />' . $this->sMessage
                 : $this->sMessage;
 
             $this->oRecipientTalkPage->doEdit( $sMessage, wfMsg( 'welcome-message-log' ), $this->iFlags );
