@@ -122,6 +122,7 @@ class HAWelcomeJob extends Job {
                     wfProfileOut( __METHOD__ );
                     return true; // so the calling method would continue.
                 }
+                    $wgMemc->set( wfMemcKey( 'HAWelcome-isPosted', $oRevision->getRawUserText() ), true, 600 ); // for ten minutes ( 60 * 10 )
                 wfDebug( __METHOD__ . " anon not messaged, going forward.\n" );
             }
 
@@ -246,8 +247,6 @@ class HAWelcomeJob extends Job {
                 // ... or the Message Wall extension is disabled and recipient's Talk Page does not exist
                 || ( !$this->bMessageWallExt && !$this->oRecipientTalkPage->exists() )
             ) {
-                global $wgMemc;
-                $wgMemc->set( wfMemcKey( 'HAWelcome-isPosted', $this->sRecipientName ), true );
                 $this->setMessage();
                 $this->sendMessage();
             }
