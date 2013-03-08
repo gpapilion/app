@@ -122,7 +122,7 @@ class HAWelcomeJob extends Job {
                     wfProfileOut( __METHOD__ );
                     return true; // so the calling method would continue.
                 }
-                    $wgMemc->set( wfMemcKey( 'HAWelcome-isPosted', $oRevision->getRawUserText() ), true, 600 ); // for ten minutes ( 60 * 10 )
+                    //$wgMemc->set( wfMemcKey( 'HAWelcome-isPosted', $oRevision->getRawUserText() ), true, 600 ); // for ten minutes ( 60 * 10 )
                 wfDebug( __METHOD__ . " anon not messaged, going forward.\n" );
             }
 
@@ -215,7 +215,10 @@ class HAWelcomeJob extends Job {
         }
 
         // Create some recipient related objects.
-        $this->oRecipient = User::newFromName( $this->sRecipientName );
+        $this->oRecipient = User::newFromId( $this->iRecipientId );
+        if ( ! $this->iRecipientId ) {
+            $this->oRecipient->setName( $this->sRecipientName );
+        }
         $this->oRecipientTalkPage = new Article( $this->oRecipient->getUserPage()->getTalkPage() );
 
         // MessageWall compatibility.
