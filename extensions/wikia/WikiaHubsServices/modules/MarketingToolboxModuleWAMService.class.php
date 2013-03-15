@@ -53,9 +53,7 @@ class MarketingToolboxModuleWAMService extends MarketingToolboxModuleNonEditable
 		]);
 	}
 
-	public function loadData($model, $module, $params) {
-		$moduleId = $params['moduleId'];
-
+	public function loadData($model, $params) {
 		$lastTimestamp = $model->getLastPublishedTimestamp(
 									$params['lang'],
 									$model::SECTION_HUBS,
@@ -174,7 +172,7 @@ class MarketingToolboxModuleWAMService extends MarketingToolboxModuleNonEditable
 					$lastTimestamp,
 					$this->verticalId,
 					$params['wiki_lang'],
-					$moduleId
+					$this->getModuleId()
 				),
 				6 * 60 * 60,
 				function () use( $params ) {
